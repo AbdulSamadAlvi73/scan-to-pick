@@ -26,7 +26,7 @@ Warehouse order pickers operate in fast-paced environments where every second an
 9. **Batch Completion State**: Once all 8 lines are completely picked, a fulfillment summary view renders, locking the scanner and preventing further scans. A "Restart Demo Batch" button allows resetting the demo.
 10. **Persistent PostgreSQL State Across Page Refreshes**: State is persisted directly in PostgreSQL (`pg` pool). Refreshing the browser or opening the app on a mobile device immediately loads the exact current progress from the database. No fake `localStorage` or temporary in-memory arrays.
 11. **Mobile-First 360px Viewport**: Responsive design tailored for compact 360px smartphone screens without horizontal scrollbars or layout breakage.
-12. **Live Scannable Barcode Companion Sheet (`/barcodes`)**: Includes an authentic SVG EAN-13 barcode generator page allowing pickers to scan real barcodes directly from a computer screen using their mobile phone or handheld scanner.
+12. **Live Scannable Barcode & QR Companion Sheet (`/barcodes`)**: Includes an authentic barcode sheet with both 1D Barcodes (via `JsBarcode`) and 2D QR Codes for each item, plus an integrated mobile camera scanner modal with native iOS/Android hardware barcode acceleration (`BarcodeDetector`).
 
 ---
 

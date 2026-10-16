@@ -9,10 +9,8 @@ import {
   ArrowLeft,
   Copy,
   Check,
-  Smartphone,
   AlertTriangle,
   QrCode,
-  Layers,
 } from "lucide-react";
 
 interface ProductBarcodeItem {
@@ -139,30 +137,6 @@ export default function BarcodeSheetPage() {
             <Barcode className="h-4 w-4" />
             <span>Open Scan Screen</span>
           </Link>
-        </div>
-
-        {/* Mobile / iPhone Testing Instructions */}
-        <div className="mb-8 rounded-2xl border border-slate-800 bg-slate-900/80 p-5 backdrop-blur">
-          <div className="flex items-center gap-2 text-amber-400 font-bold text-sm mb-2">
-            <Smartphone className="h-5 w-5" />
-            <span>How to Record on iPhone while Scanning from Laptop Screen</span>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-slate-300">
-            <div className="rounded-xl bg-slate-950/70 p-3 border border-slate-800/80">
-              <strong className="text-white block mb-1">1. Keep this page open on Laptop</strong>
-              Leave this <code className="text-amber-400">/barcodes</code> page open on your computer screen so the barcodes are clearly visible.
-            </div>
-            <div className="rounded-xl bg-slate-950/70 p-3 border border-slate-800/80">
-              <strong className="text-white block mb-1">2. Open App on your iPhone</strong>
-              Connect your iPhone to the same Wi-Fi. Open Safari and navigate to:
-              <br />
-              <code className="text-emerald-400 font-bold mt-1 inline-block">http://&lt;your-laptop-ip&gt;:3000</code>
-            </div>
-            <div className="rounded-xl bg-slate-950/70 p-3 border border-slate-800/80">
-              <strong className="text-white block mb-1">3. Point Scanner &amp; Record</strong>
-              Start iOS Screen Recording. Scan barcodes off your laptop screen or type them to test the full live flow!
-            </div>
-          </div>
         </div>
 
         {/* Section: Valid Product Barcodes */}
