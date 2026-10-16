@@ -1,153 +1,221 @@
 # Scan-to-Pick Mobile Warehouse Application
 
-A high-efficiency, mobile-first scan-to-pick screen built for warehouse order fulfillment with handheld barcode scanners. Designed for **SYNC FULFILLMENT** via **Loopin (SMC-Pvt) Limited**.
+A high-efficiency, mobile-first scan-to-pick web application designed for warehouse order fulfillment with handheld barcode scanners and mobile devices.
+
+Built as a practical technical assessment for the **Founding Engineer** position at **Loopin (SMC-Pvt) Limited** for its client **SYNC FULFILLMENT**.
+
+- **Repository**: [https://github.com/AbdulSamadAlvi73/scan-to-pick](https://github.com/AbdulSamadAlvi73/scan-to-pick)
+- **Author**: Abdul Samad Alvi (`AbdulSamadAlvi73`)
+- **Technology Stack**: Next.js 14 (App Router), TypeScript, Tailwind CSS, PostgreSQL (`pg`), Playwright.
 
 ---
 
-## 1. Quickstart & Setup Guide
+## 1. Project Purpose & Features Implemented
+
+Warehouse order pickers operate in fast-paced environments where every second and every tap matters. Handheld barcode scanners (and modern smartphones with barcode sleds) emit a burst of keystrokes followed by an `Enter` key. This application eliminates manual navigation, scrolling, and clicking, offering a zero-friction scanning experience:
+
+### Key Features
+1. **Single-Line Focused UX**: The interface displays exactly one active, incomplete picking line at a time. The warehouse location shelf code (e.g., `A-01-01`), product name, SKU, and pick quantity (`picked / required`) are rendered with high-contrast, large typography visible at arm's length.
+2. **Always-Ready Scan Input**: A dedicated input automatically gains and retains focus on page load, after every successful scan, after error alerts, and when modal drawers close. An unobtrusive background listener ensures accidental clicks outside form controls return focus to the scanner.
+3. **Hardware Scanner & Keyboard Support**: Seamlessly captures hardware barcode scanner inputs (which enter numbers and send an `Enter` keystroke) as well as manual keyboard typing followed by `Enter`. Surrounding whitespace is automatically trimmed; empty scans do nothing.
+4. **Duplicate Scan & Rapid-Fire Protection**: An internal submission guard prevents duplicate event handling from rapid hardware scanner trigger pulls or accidental double-Enters.
+5. **Atomic Pick Increment**: Scanning the correct EAN barcode increments the picked quantity by exactly 1 in PostgreSQL and visibly updates the progress counter and progress bar.
+6. **Automatic Line Advancement**: When the required quantity for a line is reached, the application automatically transitions to the next incomplete line without requiring the picker to click "Next" or touch the screen.
+7. **Wrong Barcode Rejection**: Scanning an incorrect EAN triggers a prominent, high-contrast red error alert (`Wrong barcode! Scanned "..." expected "..."`) along with an audio buzz. The picked count remains unchanged in both the database and UI, and the scanner is immediately cleared and refocused for retry.
+8. **"Not Found" Alternative Location Reassignment**: If a shelf is empty or inventory is damaged, tapping the **"Not found"** button opens a bottom sheet listing all alternative warehouse locations that currently have available stock (`stock_quantity > 0`). Selecting an alternative shelf atomically reassigns the line in PostgreSQL and updates the visible location code.
+9. **Batch Completion State**: Once all 8 lines are completely picked, a fulfillment summary view renders, locking the scanner and preventing further scans. A "Restart Demo Batch" button allows resetting the demo.
+10. **Persistent PostgreSQL State Across Page Refreshes**: State is persisted directly in PostgreSQL (`pg` pool). Refreshing the browser or opening the app on a mobile device immediately loads the exact current progress from the database. No fake `localStorage` or temporary in-memory arrays.
+11. **Mobile-First 360px Viewport**: Responsive design tailored for compact 360px smartphone screens without horizontal scrollbars or layout breakage.
+12. **Live Scannable Barcode Companion Sheet (`/barcodes`)**: Includes an authentic SVG EAN-13 barcode generator page allowing pickers to scan real barcodes directly from a computer screen using their mobile phone or handheld scanner.
+
+---
+
+## 2. Prerequisites & Windows Setup Instructions
 
 ### Prerequisites
-- **Node.js**: v18.0.0+ (Tested on v24.16.0 LTS)
-- **npm**: v9.0.0+ (Tested on 11.13.0)
-- **PostgreSQL**: Local instance, Supabase, Neon, or Prisma Postgres
+- **Operating System**: Windows 10/11, macOS, or Linux.
+- **Node.js**: v18.17+ or v20+ LTS (Tested and verified on Node.js `v24.16.0`).
+- **Package Manager**: npm (Tested on npm `v11.13.0`).
+- **PostgreSQL Database**: Any PostgreSQL 14+ instance (Local PostgreSQL, Supabase, Neon, or Prisma Postgres).
 
-### Step 1: Install Dependencies
-```bash
+### Setup Commands (Windows PowerShell)
+
+#### Step 1: Clone the Repository
+```powershell
+git clone https://github.com/AbdulSamadAlvi73/scan-to-pick.git
+cd scan-to-pick
+```
+
+#### Step 2: Install Dependencies
+```powershell
 npm install
 ```
 
-### Step 2: Configure Environment Variables
-Copy `.env.example` to `.env.local`:
-```bash
-cp .env.example .env.local
+#### Step 3: Configure Environment Variables
+Copy the template `.env.example` to `.env.local`:
+```powershell
+Copy-Item .env.example .env.local
 ```
-Update `DATABASE_URL` with your PostgreSQL connection string:
+
+Open `.env.local` in your editor and enter your PostgreSQL connection string:
 ```env
-DATABASE_URL="postgres://user:password@host:5432/postgres?sslmode=require"
+DATABASE_URL="postgres://username:password@hostname:5432/database_name?sslmode=require"
 PORT=3000
 ```
-> **Security Note**: Real database credentials are strictly server-side and never exposed to browser bundles or client code. `.env.local` is ignored in `.gitignore`.
+> **Security Note**: Real database credentials belong only in `.env.local`, which is strictly ignored in `.gitignore`. Never commit credentials to version control.
 
-### Step 3: Run Database Setup & Seeding
-Initialize the database tables and seed 1 batch with 8 picking lines:
-```bash
+#### Step 4: Initialize & Seed the Database
+Execute the database schema setup script and seed the initial batch:
+```powershell
+# Create tables and check constraints:
 npm run db:setup
-```
-To reset picking progress back to initial demo state at any time:
-```bash
+
+# Seed batch BATCH-2026-001 (8 lines with alternative stocked locations):
 npm run db:seed
 ```
 
-### Step 4: Start Development Server
-```bash
+#### Step 5: Start the Development Server
+```powershell
 npm run dev
 ```
-Open [http://localhost:3000](http://localhost:3000). For optimal warehouse handheld simulation, toggle Chrome DevTools device mode to **360 × 800 px** (e.g. Samsung Galaxy S20 / Pixel 5).
+Open **[http://localhost:3000](http://localhost:3000)** in your browser. For mobile emulation, open Chrome DevTools (Press `F12` or `Ctrl+Shift+I`), click the Device Toolbar icon (`Ctrl+Shift+M`), and select **Pixel 5** or set viewport dimensions to **360 × 800 px**.
 
-### Step 5: Run Automated Tests
-```bash
-# Run end-to-end tests in headless mobile viewport (360px)
-npm run test
-
-# Run tests with interactive UI
-npm run test:ui
-```
+To open the scannable barcode test sheet on your laptop screen, visit:
+**[http://localhost:3000/barcodes](http://localhost:3000/barcodes)**.
 
 ---
 
-## 2. Architecture & Implementation Decisions
+## 3. Verification & Quality Assurance Commands
 
-### A. Minimalist, Distraction-Free Warehouse UX
-- **Zero-Friction Workflow**: One incomplete picking line is displayed at a time with large, prominent typography for the assigned warehouse shelf/location (e.g., `A-01-01`), product name, and picked/required quantity.
-- **Hardware Scanner & Keyboard Integration**: A single, auto-refocusing input captures input from handheld laser/camera barcode scanners (which type characters and emit an `Enter` keystroke) as well as manual keyboard typing. Input is trimmed of accidental leading/trailing spaces.
-- **Auto-Advancement**: Reaching the required quantity automatically advances to the next incomplete line without scrolling or requiring a "Next" button click.
-- **Completion Guard**: When all 8 lines are fulfilled, a dedicated "Batch Complete" view renders, disabling further scanning and locking the batch.
+Every command listed below has been executed and confirmed clean with zero errors:
 
-### B. Relational Data Model (`PostgreSQL`)
-The application uses a relational model with strict database-level constraints:
-- `batches`: Holds batch number (`BATCH-2026-001`), fulfillment status (`in_progress`, `completed`), and timestamps.
-- `locations`: Shelf/bin coordinates (`A-01-01`, `B-09-02`, `OVERFLOW-A1`) categorized by zone.
-- `products`: Product catalog with SKU, name, and unique 13-digit EAN barcode (`products.ean UNIQUE`).
-- `product_locations`: Multi-location inventory stock (`product_id, location_id, stock_quantity`). Allows querying alternate stocked locations when a product is unavailable at its primary location.
-- `batch_lines`: Ordered batch lines (`line_number`) with `product_id`, `assigned_location_id`, `required_qty`, `picked_qty`, and `is_completed`.
-  - **Constraint**: `CHECK (picked_qty >= 0 AND picked_qty <= required_qty)` guarantees at the engine level that picked quantities can never exceed the required quantity.
+| Task | Command | Description |
+| :--- | :--- | :--- |
+| **Linting** | `npm run lint` | Runs Next.js ESLint rules (0 errors, 0 warnings). |
+| **Type Check** | `npm run type-check` | Runs TypeScript compiler check (`tsc --noEmit`). |
+| **Production Build** | `npm run build` | Compiles optimized Next.js production bundle. |
+| **Production Server** | `npm start` | Starts Next.js production server on port 3000. |
+| **All Automated Tests** | `npm test` | Runs all 10 Playwright E2E and API integration tests. |
+| **E2E Browser Tests** | `npm run test:e2e` | Runs 4 mobile browser tests in a 360px viewport. |
+| **API Integration Tests**| `npm run test:integration` | Runs 6 backend PostgreSQL database integration tests. |
+| **Interactive Test UI** | `npm run test:ui` | Launches Playwright UI runner with time-travel trace. |
 
-### C. Concurrency & Double-Scan Prevention
-In `src/lib/picking-service.ts`, `processScan()` uses an atomic PostgreSQL transaction with row-level locking:
+---
+
+## 4. Architecture & Key Technical Decisions
+
+### A. Next.js 14 App Router + Server-Only DB Layer
+Next.js App Router enables colocation of frontend client components and secure server-side API routes.
+- The PostgreSQL database client (`src/lib/db.ts`) contains an explicit runtime safety guard (`if (typeof window !== "undefined") throw ...`), guaranteeing that database connection credentials can never be leaked to the browser.
+- API endpoints (`/api/batch`, `/api/scan`, `/api/locations`) use `export const dynamic = "force-dynamic"` to bypass Next.js static route caching and guarantee real-time database reads.
+
+### B. Relational Schema & Database-Level Check Constraints
+The schema (`db/schema.sql`) enforces integrity at the relational database level:
+- `batches`: Holds batch identifier (`BATCH-2026-001`), fulfillment status, and timestamps.
+- `locations`: Shelf codes (`A-01-01`, `B-09-02`, `OVERFLOW-A1`) and zone partitions.
+- `products`: Product catalog with unique 13-digit EAN barcodes (`products.ean UNIQUE`).
+- `product_locations`: Multi-location stock ledger (`product_id, location_id, stock_quantity`).
+- `batch_lines`: Ordered lines with required vs picked quantities.
+  - **Check Constraint**: `CONSTRAINT chk_picked_lte_required CHECK (picked_qty <= required_qty)` guarantees at the SQL level that a picker cannot over-pick items.
+
+### C. Atomic Transactions & Row-Level Locking
+Barcode scanning involves fast, concurrent network requests. In `src/lib/picking-service.ts`, `processScan()` uses an atomic PostgreSQL transaction with row-level locking:
 ```sql
-SELECT ... FROM batch_lines WHERE id = $1 FOR UPDATE OF batch_lines
+SELECT ... FROM batch_lines WHERE id = $1 AND batch_id = $2 FOR UPDATE OF batch_lines
 ```
-This prevents duplicate submissions from rapid Enter key presses or network retries from incrementing counts twice.
+This locks the specific line record during the check and increment, eliminating race conditions and duplicate increments even if two requests arrive concurrently.
 
-### D. "Not Found" Shelf Reassignment
-If an item is depleted or missing at the assigned location, clicking the **"Not found"** button opens a bottom sheet listing only alternative locations that currently have positive stock (`stock_quantity > 0`). Selecting an alternate location atomically updates `batch_lines.assigned_location_id` in PostgreSQL and immediately refocuses the scanner input.
-
----
-
-## 3. Seeded Sample Data (8 Picking Lines)
-
-| Line # | Product Name | EAN Barcode | Assigned Location | Required | Alternate Locations With Stock |
-| :---: | :--- | :---: | :---: | :---: | :--- |
-| **1** | Pro Wireless Mechanical Keyboard | `8712345678901` | `A-01-01` | 2 | `OVERFLOW-A1` (24 units) |
-| **2** | Ergonomic Vertical Optical Mouse | `8712345678918` | `A-01-02` | 1 | `B-09-02` (8 units) |
-| **3** | Heavy-Duty Braided USB-C Cable 2M | `8712345678925` | `A-02-01` | 3 | `OVERFLOW-B2` (100 units) |
-| **4** | Ultra-Clear 4K DisplayPort Cable | `8712345678932` | `B-03-01` | 1 | *(Single location)* |
-| **5** | Noise-Cancelling Over-Ear Headset | `8712345678949` | `B-03-02` | 2 | `C-05-03` (15 units) |
-| **6** | MagSafe Magnetic Phone Mount | `8712345678956` | `B-04-01` | 1 | *(Single location)* |
-| **7** | 65W GaN Dual-Port Fast Charger | `8712345678963` | `C-01-01` | 2 | `OVERFLOW-A1` (25 units) |
-| **8** | Anti-Static Microfiber Cleaning Kit | `8712345678970` | `C-02-01` | 1 | *(Single location)* |
+### D. Cloud Database Connection Pool Resilience
+Connecting to remote cloud PostgreSQL instances (e.g., Supabase, Prisma Postgres, Neon) over public networks can occasionally encounter cold starts or idle connection drops. The connection pool in `db.ts` is configured with:
+- `connectionTimeoutMillis: 20000` (20 seconds) to prevent premature timeouts during cloud connection establishment.
+- TCP `keepAlive: true` to prevent intermediate firewalls and serverless gateways from severing idle sockets.
+- Automatic connection retry in `getClient()` and `query()` to transparently handle dropped idle sockets.
 
 ---
 
-## 4. Automated Testing Suite
+## 5. Seeded Batch Data (8 Picking Lines)
 
-The project includes both **API/database integration tests** and **browser end-to-end tests** executed in a 360px mobile viewport (`Pixel 5` profile):
-
-```bash
-# Run all automated tests (10 tests)
-npm test
-
-# Run Playwright mobile browser E2E tests (4 tests)
-npm run test:e2e
-
-# Run PostgreSQL API integration tests (6 tests)
-npm run test:integration
-```
-
-### Verified Test Cases (10 / 10 Passing):
-
-#### A. Mobile Browser End-to-End Tests (`tests/scan-to-pick.spec.ts`)
-1. **Single Scan Increment**: Scans correct EAN (`8712345678901`) on Line 1; verifies count increases from `0 / 2` to `1 / 2`, input clears, and focus returns to scanner.
-2. **Wrong Barcode Rejection**: Scans an invalid barcode (`9999999999999`); verifies count remains `0 / 2` and a clear red error alert is displayed.
-3. **Auto-Advance & PostgreSQL Persistence**: Completes Line 1; verifies immediate auto-advance to Line 2 (`Ergonomic Vertical Optical Mouse` at `A-01-02`). Refreshes the page; verifies picking progress is fully preserved from PostgreSQL.
-4. **Alternative Location Reassignment ("Not Found")**: Opens the "Not found" modal; selects `OVERFLOW-A1`; verifies assigned shelf updates to `OVERFLOW-A1` and scanner input refocuses immediately.
-
-#### B. Backend API & Concurrency Integration Tests (`tests/api-integration.spec.ts`)
-5. **Initial Batch Retrieval**: `GET /api/batch` returns batch `BATCH-2026-001`, all 8 lines, and current incomplete line #1.
-6. **Persistent Scan Increment**: `POST /api/scan` atomically increments picked count in PostgreSQL.
-7. **Wrong Barcode Rejection**: `POST /api/scan` with mismatched EAN returns HTTP 400 (`WRONG_EAN`) and leaves count unchanged.
-8. **Line Completion Advancement**: Submitting full required quantity marks line completed and returns next incomplete line.
-9. **Stocked Locations Lookup**: `GET /api/locations` returns only locations with available inventory (`stock_quantity > 0`).
-10. **Assigned Shelf Persistence**: `POST /api/locations` updates the line's assigned location in PostgreSQL.
+| Line # | Product Name | SKU | Expected EAN | Primary Shelf | Qty | Secondary Stocked Locations |
+| :---: | :--- | :--- | :---: | :---: | :---: | :--- |
+| **1** | Pro Wireless Mechanical Keyboard | `TECH-KB-01` | `8712345678901` | `A-01-01` | 2 | `OVERFLOW-A1` (24 units) |
+| **2** | Ergonomic Vertical Optical Mouse | `TECH-MS-02` | `8712345678918` | `A-01-02` | 1 | `B-09-02` (8 units) |
+| **3** | Heavy-Duty Braided USB-C Cable 2M | `CBL-USBC-03` | `8712345678925` | `A-02-01` | 3 | `OVERFLOW-B2` (100 units) |
+| **4** | Ultra-Clear 4K DisplayPort Cable | `CBL-DP-04` | `8712345678932` | `B-03-01` | 1 | *(Primary only)* |
+| **5** | Noise-Cancelling Over-Ear Headset | `AUD-HSET-05` | `8712345678949` | `B-03-02` | 2 | `C-05-03` (15 units) |
+| **6** | MagSafe Magnetic Phone Mount | `ACC-MNT-06` | `8712345678956` | `B-04-01` | 1 | *(Primary only)* |
+| **7** | 65W GaN Dual-Port Fast Charger | `PWR-CHG-07` | `8712345678963` | `C-01-01` | 2 | `OVERFLOW-A1` (25 units) |
+| **8** | Anti-Static Microfiber Cleaning Kit | `CLN-KIT-08` | `8712345678970` | `C-02-01` | 1 | *(Primary only)* |
 
 ---
 
-## 5. Transparent AI Tool Usage Disclosure
+## 6. How to Test on Mobile / iPhone & Record Live Video
 
-In compliance with interview assessment instructions:
-- **Pair Programming Agent**: Used Antigravity (Google DeepMind agentic coding assistant) in high-reasoning mode.
-- **Scaffolding & Architecture**: AI assisted in configuring the Next.js App Router structure, TypeScript interfaces, and Tailwind CSS design tokens.
-- **SQL & Concurrency Logic**: AI drafted the PostgreSQL schema check constraints (`CHECK (picked_qty <= required_qty)`) and transaction locking logic (`SELECT ... FOR UPDATE`).
-- **Test Generation**: Playwright test suites and assertions were co-authored with AI to cover edge cases, cloud database network timeouts, and mobile viewport requirements.
-- **Engineering Review**: All generated code was manually inspected, type-checked (`tsc --noEmit`), linted (`next lint`), and validated through end-to-end test execution against real database endpoints.
+You can test and record the actual application directly on your **iPhone screen** while scanning real barcodes off your laptop screen!
+
+### Step 1: Open the Scannable Barcode Sheet on Laptop
+1. Start the Next.js server on your laptop: `npm run dev` (or `npm start`).
+2. In your laptop browser, navigate to: **`http://localhost:3000/barcodes`**.
+3. Keep this tab open. It displays all 8 product EAN-13 barcodes with crisp, high-contrast SVG bars, plus an invalid test barcode (`8712345678994`).
+
+### Step 2: Open the Scan-to-Pick App on your iPhone
+1. Ensure your iPhone and laptop are connected to the **same local Wi-Fi network**.
+2. Find your laptop's local IP address on Windows:
+   - Open PowerShell and run: `ipconfig`
+   - Look for the **IPv4 Address** (e.g., `192.168.1.50` or `192.168.100.12`).
+3. On your iPhone, open **Safari** (or Chrome) and navigate to:
+   ```
+   http://<your-laptop-ip>:3000
+   ```
+   *(Example: `http://192.168.1.50:3000`)*.
+4. The Scan-to-Pick mobile interface loads instantly with Line 1 active!
+
+### Step 3: Record the Screen on iPhone
+1. Open iOS **Control Center** (swipe down from the top-right corner of your iPhone screen).
+2. Tap the **Screen Recording** icon (circle with a dot). A 3-second countdown will start.
+3. Follow the **Two-Minute Recording Script** below!
+4. When finished, tap the red recording indicator in the dynamic island / status bar and tap **Stop**. The video is saved directly to your iPhone Photos app ready for upload/submission.
 
 ---
 
-## 6. What I Would Build Next (Production Roadmap)
+## 7. Two-Minute Screen Recording Script
 
-If this were developed into a full production warehouse management system (WMS):
-1. **Pick Path Optimization**: Sort batch lines dynamically using a Traveling Salesperson Problem (TSP) heuristic based on warehouse aisle/bay geometry to minimize physical walking distance.
-2. **Offline-First Resilience**: Implement an offline Service Worker and IndexedDB queue with background sync so warehouse pickers in dead zones can continue scanning without interruption.
-3. **Multi-Item Batch / Wave Picking**: Support multi-tote picking carts where pickers collect items for multiple orders simultaneously into color-coded tote bins.
-4. **Lot & Expiration Tracking**: Add barcode scanning validation for serial numbers, batch lot codes, and FEFO (First-Expired, First-Out) perishable validation.
-5. **Role-Based Authentication & Device Fleet Telemetry**: Integrate warehouse employee badge scanning (SSO), scanner battery/hardware health monitoring, and pick rate telemetry (units picked per hour).
+*Total duration target: 1 minute 45 seconds to 2 minutes.*
+
+| Time | Action | What to Show on Screen | Voiceover / Text Cue |
+| :---: | :--- | :--- | :--- |
+| **0:00 – 0:15** | **Introduction & Initial State** | Show the top header (`SYNC FULFILLMENT`), batch badge (`Line 1 of 8`), prominent shelf `A-01-01`, product `Pro Wireless Mechanical Keyboard`, and counter `0 / 2`. | *"Welcome to the SYNC FULFILLMENT Scan-to-Pick mobile interface. We are starting on Line 1 of 8 with 0 of 2 items picked."* |
+| **0:15 – 0:30** | **Correct Barcode Scan** | Scan or enter the correct EAN `8712345678901` (from `/barcodes` on laptop). Press Enter. | *"Scanning the matching barcode increments the picked quantity by exactly one to 1 of 2. The input immediately clears and regains focus."* |
+| **0:30 – 0:45** | **Wrong Barcode Scan (Negative Test)** | Scan or enter the wrong EAN `8712345678994` (or `9999999999999`). Press Enter. | *"Scanning an incorrect barcode displays a prominent red error banner. The picked count remains unchanged at 1 of 2, and the scanner is ready for retry."* |
+| **0:45 – 1:05** | **Line Completion & Auto-Advance** | Scan the correct EAN `8712345678901` for the second item. Press Enter. | *"Scanning the second unit reaches the required count. The application automatically advances to Line 2 without any manual clicking or scrolling."* |
+| **1:05 – 1:25** | **"Not Found" Alternative Location** | On Line 2 (Mouse at `A-01-02`), tap the **"Not found"** button. The drawer opens showing alternative location `B-09-02` (8 in stock). Tap `B-09-02`. | *"If an item is missing on the assigned shelf, tapping 'Not found' displays stocked alternative locations. Selecting B-09-02 updates the shelf in PostgreSQL and refocuses the scanner."* |
+| **1:25 – 1:45** | **PostgreSQL Persistence on Refresh** | Refresh the browser page (pull-to-refresh on Safari or tap the browser reload button). | *"Reloading the browser proves data persistence in PostgreSQL. Line 2 remains active with the newly assigned shelf B-09-02, preserving exact state across reloads."* |
+
+---
+
+## 8. Transparent AI Tool Usage Disclosure
+
+In adherence to the interview assessment guidelines:
+- **AI Coding Partner**: Google DeepMind Antigravity agentic coding assistant in high-reasoning mode.
+- **Scaffolding & Boilerplate**: AI assisted in scaffolding the initial Next.js App Router structure, TypeScript models, and Tailwind design tokens.
+- **Database & Concurrency Logic**: Relational schema check constraints (`CHECK (picked_qty <= required_qty)`) and atomic transaction row-locking (`SELECT ... FOR UPDATE`) were co-architected with AI.
+- **Automated Testing Suite**: AI assisted in writing Playwright E2E and API integration test suites covering mobile viewports, network cold starts, and error paths.
+- **Engineering Audit & Review**: All generated code was inspected, type-checked, linted, tested against a real PostgreSQL database, and verified in real-time.
+
+---
+
+## 9. Known Limitations
+
+1. **Single Demo Batch**: The current demonstration is configured for batch `BATCH-2026-001`. In a production warehouse environment, a picker assignment queue would dynamically route batches based on picker zone.
+2. **Audio Autoplay Policies**: Audio chimes are generated via Web Audio API. Modern mobile browsers require an initial user tap before audio can play without restriction.
+3. **External Database**: Requires an active PostgreSQL connection string in `.env.local` to run tests and live features.
+
+---
+
+## 10. What I Would Build Next (Production WMS Roadmap)
+
+If transitioning this project into a full enterprise warehouse management system:
+1. **Pick Path Optimization**: Implement a Traveling Salesperson Problem (TSP) heuristic algorithm based on 3D warehouse coordinate graphs (Aisle, Bay, Level) to sequence lines and minimize picker walking distance.
+2. **Offline-First Synchronization**: Deploy an offline Service Worker with an IndexedDB mutation queue and background sync so pickers inside metal warehouse dead zones can continue scanning without downtime.
+3. **Multi-Tote Cluster / Wave Picking**: Support multi-bin picking carts where a worker picks items for 6 to 12 distinct customer orders simultaneously into color-coded tote compartments.
+4. **Lot, Batch & Serial Tracking**: Validate serialized items and enforce First-Expired, First-Out (FEFO) rules for perishable inventory.
+5. **Scanner Sled Hardware Telemetry**: Integrate Bluetooth Low Energy (BLE) APIs for Zebra/Honeywell scanner battery monitoring, firmware health, and scan-rate performance metrics (units per hour).

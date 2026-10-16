@@ -7,12 +7,14 @@ import { ActiveLineCard } from "@/components/ActiveLineCard";
 import { AlternativeLocationsModal } from "@/components/AlternativeLocationsModal";
 import { ScanFeedback, FeedbackState } from "@/components/ScanFeedback";
 import { BatchCompleteView } from "@/components/BatchCompleteView";
+import Link from "next/link";
 import {
   Boxes,
   RotateCcw,
   AlertCircle,
   Loader2,
   Scan,
+  QrCode,
 } from "lucide-react";
 
 export default function ScanToPickPage() {
@@ -234,6 +236,18 @@ export default function ScanToPickPage() {
               </span>
             )}
 
+            <Link
+              id="header-barcodes-link"
+              href="/barcodes"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white"
+              title="Open scannable barcode test sheet"
+              aria-label="Open scannable barcode test sheet"
+            >
+              <QrCode className="h-4 w-4 text-emerald-400" />
+            </Link>
+
             <button
               id="header-reset-btn"
               type="button"
@@ -344,7 +358,15 @@ export default function ScanToPickPage() {
                 <Scan className="h-3.5 w-3.5 text-slate-400" />
                 Handheld Scan-to-Pick
               </span>
-              <span>PostgreSQL Persisted</span>
+              <Link
+                href="/barcodes"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-amber-400 hover:underline flex items-center gap-1 font-medium"
+              >
+                <QrCode className="h-3 w-3" />
+                <span>Barcode Sheet</span>
+              </Link>
             </footer>
           </>
         )}
