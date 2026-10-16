@@ -65,14 +65,19 @@ export function CameraScannerModal({
             Html5QrcodeSupportedFormats.QR_CODE,
           ],
           verbose: false,
+          experimentalFeatures: {
+            useBarCodeDetectorIfSupported: true,
+          },
         });
 
         scannerRef.current = html5QrCode;
 
         const config = {
-          fps: 15,
-          qrbox: { width: 260, height: 160 },
-          aspectRatio: 1.333334,
+          fps: 20,
+          qrbox: (viewfinderWidth: number, viewfinderHeight: number) => ({
+            width: Math.max(220, Math.floor(viewfinderWidth * 0.85)),
+            height: Math.max(160, Math.floor(viewfinderHeight * 0.65)),
+          }),
         };
 
         await html5QrCode.start(

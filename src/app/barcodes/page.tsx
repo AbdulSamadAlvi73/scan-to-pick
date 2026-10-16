@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { BarcodeSvg } from "@/components/BarcodeSvg";
+import { QrCodeSvg } from "@/components/QrCodeSvg";
 import {
   Barcode,
   ArrowLeft,
@@ -11,6 +12,7 @@ import {
   Smartphone,
   AlertTriangle,
   QrCode,
+  Layers,
 } from "lucide-react";
 
 interface ProductBarcodeItem {
@@ -198,8 +200,11 @@ export default function BarcodeSheetPage() {
                   </div>
                 </div>
 
-                <div className="mt-4 flex flex-col items-center justify-center gap-2 pt-2 border-t border-slate-800/80">
+                <div className="mt-4 flex flex-wrap items-center justify-center gap-3 pt-2 border-t border-slate-800/80">
                   <BarcodeSvg code={item.ean} />
+                  <QrCodeSvg value={item.ean} size={88} />
+                </div>
+                <div className="mt-2 flex items-center justify-center">
                   <button
                     type="button"
                     onClick={() => handleCopy(item.ean)}
@@ -244,8 +249,9 @@ export default function BarcodeSheetPage() {
                 EAN: 8712345678994
               </span>
             </div>
-            <div className="flex flex-col items-center gap-2">
+            <div className="flex flex-wrap items-center gap-3">
               <BarcodeSvg code="8712345678994" />
+              <QrCodeSvg value="8712345678994" size={88} />
               <button
                 type="button"
                 onClick={() => handleCopy("8712345678994")}
