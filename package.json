@@ -9,6 +9,8 @@
     "lint": "next lint",
     "type-check": "tsc --noEmit",
     "test": "playwright test",
+    "test:e2e": "playwright test tests/scan-to-pick.spec.ts",
+    "test:integration": "playwright test tests/api-integration.spec.ts",
     "test:ui": "playwright test --ui",
     "db:setup": "tsx scripts/setup-db.ts",
     "db:seed": "tsx scripts/seed.ts"

@@ -101,17 +101,34 @@ If an item is depleted or missing at the assigned location, clicking the **"Not 
 
 ## 4. Automated Testing Suite
 
-Automated tests are written with Playwright and executed in a 360px mobile viewport (`Pixel 5` profile):
+The project includes both **API/database integration tests** and **browser end-to-end tests** executed in a 360px mobile viewport (`Pixel 5` profile):
 
 ```bash
-npx playwright test
+# Run all automated tests (10 tests)
+npm test
+
+# Run Playwright mobile browser E2E tests (4 tests)
+npm run test:e2e
+
+# Run PostgreSQL API integration tests (6 tests)
+npm run test:integration
 ```
 
-### Verified Test Cases:
+### Verified Test Cases (10 / 10 Passing):
+
+#### A. Mobile Browser End-to-End Tests (`tests/scan-to-pick.spec.ts`)
 1. **Single Scan Increment**: Scans correct EAN (`8712345678901`) on Line 1; verifies count increases from `0 / 2` to `1 / 2`, input clears, and focus returns to scanner.
 2. **Wrong Barcode Rejection**: Scans an invalid barcode (`9999999999999`); verifies count remains `0 / 2` and a clear red error alert is displayed.
 3. **Auto-Advance & PostgreSQL Persistence**: Completes Line 1; verifies immediate auto-advance to Line 2 (`Ergonomic Vertical Optical Mouse` at `A-01-02`). Refreshes the page; verifies picking progress is fully preserved from PostgreSQL.
-4. **Alternative Location Reassignment ("Not Found")**: Opens the "Not found" modal; selects `OVERFLOW-A1`; verifies assigned shelf updates and scanner refocuses.
+4. **Alternative Location Reassignment ("Not Found")**: Opens the "Not found" modal; selects `OVERFLOW-A1`; verifies assigned shelf updates to `OVERFLOW-A1` and scanner input refocuses immediately.
+
+#### B. Backend API & Concurrency Integration Tests (`tests/api-integration.spec.ts`)
+5. **Initial Batch Retrieval**: `GET /api/batch` returns batch `BATCH-2026-001`, all 8 lines, and current incomplete line #1.
+6. **Persistent Scan Increment**: `POST /api/scan` atomically increments picked count in PostgreSQL.
+7. **Wrong Barcode Rejection**: `POST /api/scan` with mismatched EAN returns HTTP 400 (`WRONG_EAN`) and leaves count unchanged.
+8. **Line Completion Advancement**: Submitting full required quantity marks line completed and returns next incomplete line.
+9. **Stocked Locations Lookup**: `GET /api/locations` returns only locations with available inventory (`stock_quantity > 0`).
+10. **Assigned Shelf Persistence**: `POST /api/locations` updates the line's assigned location in PostgreSQL.
 
 ---
 
