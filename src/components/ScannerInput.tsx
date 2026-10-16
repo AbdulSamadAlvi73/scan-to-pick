@@ -56,20 +56,26 @@ export function ScannerInput({
     return () => window.removeEventListener("click", handleGlobalClick);
   }, [disabled, inputRef]);
 
+  const isSubmittingRef = useRef(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const barcode = value.trim();
-    if (!barcode || isProcessing || disabled) {
+    if (!barcode || isProcessing || disabled || isSubmittingRef.current) {
       return;
     }
 
+    isSubmittingRef.current = true;
     // Immediately clear input to prepare for next scan
     setValue("");
-    await onScan(barcode);
-
-    // Refocus input
-    if (inputRef.current) {
-      inputRef.current.focus();
+    try {
+      await onScan(barcode);
+    } finally {
+      isSubmittingRef.current = false;
+      // Refocus input
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
     }
   };
 

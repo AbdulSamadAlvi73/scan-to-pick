@@ -292,7 +292,11 @@ export async function processScan(
       isBatchComplete,
     };
   } catch (err: unknown) {
-    await client.query("ROLLBACK");
+    try {
+      await client.query("ROLLBACK");
+    } catch {
+      // Ignore rollback failure if connection was severed
+    }
     console.error("Error processing barcode scan:", err);
     return {
       success: false,
@@ -301,7 +305,11 @@ export async function processScan(
         err instanceof Error ? err.message : "Database error processing scan.",
     };
   } finally {
-    client.release();
+    try {
+      client.release();
+    } catch {
+      // Ignore release failure if client was destroyed
+    }
   }
 }
 

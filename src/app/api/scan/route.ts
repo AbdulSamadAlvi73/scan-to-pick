@@ -39,8 +39,8 @@ export async function POST(req: Request) {
     );
 
     if (!result.success) {
-      // 400 for wrong EAN or logic errors, so caller knows it was rejected
-      return NextResponse.json(result, { status: 400 });
+      const status = result.errorType === "DB_ERROR" ? 500 : 400;
+      return NextResponse.json(result, { status });
     }
 
     return NextResponse.json(result, { status: 200 });

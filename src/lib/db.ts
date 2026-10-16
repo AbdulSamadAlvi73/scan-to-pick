@@ -31,7 +31,8 @@ export function getPool(): Pool {
     ssl: isLocal ? false : { rejectUnauthorized: false },
     max: 10,
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 5000,
+    connectionTimeoutMillis: 20000,
+    keepAlive: true,
   });
 
   pool.on("error", (err) => {
@@ -46,10 +47,20 @@ export async function query<T extends QueryResultRow = any>(
   params?: any[]
 ): Promise<QueryResult<T>> {
   const p = getPool();
-  return p.query<T>(text, params);
+  try {
+    return await p.query<T>(text, params);
+  } catch (err) {
+    console.warn("Query failed, retrying once in case of dropped connection:", err);
+    return await p.query<T>(text, params);
+  }
 }
 
 export async function getClient(): Promise<PoolClient> {
   const p = getPool();
-  return p.connect();
+  try {
+    return await p.connect();
+  } catch (err) {
+    console.warn("Client connect failed, retrying once:", err);
+    return await p.connect();
+  }
 }

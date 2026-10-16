@@ -54,6 +54,9 @@ test.describe("PostgreSQL Backend & API Integration Tests", () => {
       },
     });
 
+    if (scanRes.status() !== 200) {
+      console.error("Scan error response:", await scanRes.json());
+    }
     expect(scanRes.status()).toBe(200);
     const scanData = await scanRes.json();
     expect(scanData.success).toBe(true);
