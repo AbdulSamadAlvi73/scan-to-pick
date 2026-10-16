@@ -332,6 +332,7 @@ export default function ScanToPickPage() {
                     disabled={isScanning}
                     isProcessing={isScanning}
                     autoFocusRef={barcodeInputRef}
+                    expectedEan={batchState.currentLine?.productEan}
                   />
                 </div>
 
