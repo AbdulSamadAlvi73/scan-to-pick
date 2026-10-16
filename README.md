@@ -148,51 +148,7 @@ Connecting to remote cloud PostgreSQL instances (e.g., Supabase, Prisma Postgres
 
 ---
 
-## 6. How to Test on Mobile / iPhone & Record Live Video
-
-You can test and record the actual application directly on your **iPhone screen** while scanning real barcodes off your laptop screen!
-
-### Step 1: Open the Scannable Barcode Sheet on Laptop
-1. Start the Next.js server on your laptop: `npm run dev` (or `npm start`).
-2. In your laptop browser, navigate to: **`http://localhost:3000/barcodes`**.
-3. Keep this tab open. It displays all 8 product EAN-13 barcodes with crisp, high-contrast SVG bars, plus an invalid test barcode (`8712345678994`).
-
-### Step 2: Open the Scan-to-Pick App on your iPhone
-1. Ensure your iPhone and laptop are connected to the **same local Wi-Fi network**.
-2. Find your laptop's local IP address on Windows:
-   - Open PowerShell and run: `ipconfig`
-   - Look for the **IPv4 Address** (e.g., `192.168.1.50` or `192.168.100.12`).
-3. On your iPhone, open **Safari** (or Chrome) and navigate to:
-   ```
-   http://<your-laptop-ip>:3000
-   ```
-   *(Example: `http://192.168.1.50:3000`)*.
-4. The Scan-to-Pick mobile interface loads instantly with Line 1 active!
-
-### Step 3: Record the Screen on iPhone
-1. Open iOS **Control Center** (swipe down from the top-right corner of your iPhone screen).
-2. Tap the **Screen Recording** icon (circle with a dot). A 3-second countdown will start.
-3. Follow the **Two-Minute Recording Script** below!
-4. When finished, tap the red recording indicator in the dynamic island / status bar and tap **Stop**. The video is saved directly to your iPhone Photos app ready for upload/submission.
-
----
-
-## 7. Two-Minute Screen Recording Script
-
-*Total duration target: 1 minute 45 seconds to 2 minutes.*
-
-| Time | Action | What to Show on Screen | Voiceover / Text Cue |
-| :---: | :--- | :--- | :--- |
-| **0:00 – 0:15** | **Introduction & Initial State** | Show the top header (`SYNC FULFILLMENT`), batch badge (`Line 1 of 8`), prominent shelf `A-01-01`, product `Pro Wireless Mechanical Keyboard`, and counter `0 / 2`. | *"Welcome to the SYNC FULFILLMENT Scan-to-Pick mobile interface. We are starting on Line 1 of 8 with 0 of 2 items picked."* |
-| **0:15 – 0:30** | **Correct Barcode Scan** | Scan or enter the correct EAN `8712345678901` (from `/barcodes` on laptop). Press Enter. | *"Scanning the matching barcode increments the picked quantity by exactly one to 1 of 2. The input immediately clears and regains focus."* |
-| **0:30 – 0:45** | **Wrong Barcode Scan (Negative Test)** | Scan or enter the wrong EAN `8712345678994` (or `9999999999999`). Press Enter. | *"Scanning an incorrect barcode displays a prominent red error banner. The picked count remains unchanged at 1 of 2, and the scanner is ready for retry."* |
-| **0:45 – 1:05** | **Line Completion & Auto-Advance** | Scan the correct EAN `8712345678901` for the second item. Press Enter. | *"Scanning the second unit reaches the required count. The application automatically advances to Line 2 without any manual clicking or scrolling."* |
-| **1:05 – 1:25** | **"Not Found" Alternative Location** | On Line 2 (Mouse at `A-01-02`), tap the **"Not found"** button. The drawer opens showing alternative location `B-09-02` (8 in stock). Tap `B-09-02`. | *"If an item is missing on the assigned shelf, tapping 'Not found' displays stocked alternative locations. Selecting B-09-02 updates the shelf in PostgreSQL and refocuses the scanner."* |
-| **1:25 – 1:45** | **PostgreSQL Persistence on Refresh** | Refresh the browser page (pull-to-refresh on Safari or tap the browser reload button). | *"Reloading the browser proves data persistence in PostgreSQL. Line 2 remains active with the newly assigned shelf B-09-02, preserving exact state across reloads."* |
-
----
-
-## 8. Transparent AI Tool Usage Disclosure
+## 6. Transparent AI Tool Usage Disclosure
 
 In adherence to the interview assessment guidelines:
 - **AI Coding Partner**: Google DeepMind Antigravity agentic coding assistant in high-reasoning mode.
@@ -203,7 +159,7 @@ In adherence to the interview assessment guidelines:
 
 ---
 
-## 9. Known Limitations
+## 7. Known Limitations
 
 1. **Single Demo Batch**: The current demonstration is configured for batch `BATCH-2026-001`. In a production warehouse environment, a picker assignment queue would dynamically route batches based on picker zone.
 2. **Audio Autoplay Policies**: Audio chimes are generated via Web Audio API. Modern mobile browsers require an initial user tap before audio can play without restriction.
@@ -211,7 +167,7 @@ In adherence to the interview assessment guidelines:
 
 ---
 
-## 10. What I Would Build Next (Production WMS Roadmap)
+## 8. What I Would Build Next (Production WMS Roadmap)
 
 If transitioning this project into a full enterprise warehouse management system:
 1. **Pick Path Optimization**: Implement a Traveling Salesperson Problem (TSP) heuristic algorithm based on 3D warehouse coordinate graphs (Aisle, Bay, Level) to sequence lines and minimize picker walking distance.
