@@ -15,6 +15,7 @@ import {
   Loader2,
   Scan,
   QrCode,
+  Database,
 } from "lucide-react";
 
 export default function ScanToPickPage() {
@@ -235,6 +236,18 @@ export default function ScanToPickPage() {
                 Line {batchState.isBatchComplete ? batchState.totalLines : (batchState.currentLine?.lineNumber || 1)} of {batchState.totalLines}
               </span>
             )}
+
+            <Link
+              id="header-database-link"
+              href="/database"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white"
+              title="Open PostgreSQL Database Explorer (phpMyAdmin style)"
+              aria-label="Open PostgreSQL Database Explorer"
+            >
+              <Database className="h-4 w-4 text-blue-400" />
+            </Link>
 
             <Link
               id="header-barcodes-link"
